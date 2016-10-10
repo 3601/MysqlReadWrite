@@ -24,9 +24,12 @@
 #include <cstdlib>
 #include <vector>
 #include <string>
-#include <iosfwd>  //contains all forward declarations of iostream
+// #include <iosfwd>  //contains all forward declarations of iostream
+
+#include <boost/property_tree/ptree.hpp>
 
 #include "columnEntry.h"
+#include "configRW.h"
 
 template<typename T1, typename T2, typename T3>
 class TableEntry 
@@ -40,7 +43,16 @@ class TableEntry
         
         // if entryTitle already exists, false is returned
         bool addEntry (const std::string& entryTitle);
-
+        
+        // add table entries from configuration file
+        // false is returned if error (exception) is encountered
+        bool addTableConfig (ConfigRW& cfg, const std::string& sensor_name);
+        
+        // if entryTitle already exists and is not of std::string type
+        // false is returned. Otherwise the entry is created and
+        // a time stamp string "YYYY-MM-DD HH:MM:SS" is added
+        bool addTimeStamp (const std::string& entryTitle = "Time");
+        
         // access to vector element using column title
         // if entryTitle is not found, a new entry with the name is created        
         ColumnEntry<T1,T2,T3>& operator[] (const std::string& entryTitle);

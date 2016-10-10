@@ -7,10 +7,14 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <string>
-#include <sstream>
 #include <typeinfo>
+#include <chrono>
+#include <ctime>
+
+#include <boost/property_tree/ptree.hpp>
 
 #include "tableEntry.h"
 
@@ -33,10 +37,101 @@ bool TableEntry<T1,T2,T3>::addEntry(const std::string& entryTitle)
 }
 
 template<typename T1, typename T2, typename T3>
+bool TableEntry<T1,T2,T3>::addTableConfig(ConfigRW& cfg, const std::string& sensor_name)
+{
+    std::istringstream entryStream { };
+    
+    const boost::property_tree::ptree& Ttree = cfg.getTableConfig(sensor_name);
+    
+    try
+    {
+        entryStream.str(Ttree.get<std::string>(cfg.table_entries));
+    }
+    catch (...)
+    {
+        return false;
+    }
+    while (entryStream >> *this);  //add new entries to this table
+    return true;
+}
+
+template<typename T1, typename T2, typename T3>
+bool TableEntry<T1,T2,T3>::addTimeStamp(const std::string& entryTitle)
+{
+    std::stringstream timeStream { };
+    
+    // gets the current system time. This is then converted to the C-type
+    // time_t format and subsequently to the tm struct format from which
+    // year, month, day etc can be extracted
+    
+    auto currTime = std::chrono::system_clock::now();
+    std::time_t currTime_t = std::chrono::system_clock::to_time_t(currTime);
+    std::tm currTime_tm = *localtime(&currTime_t);
+    
+    timeStream << (currTime_tm.tm_year + 1900) << "-";
+    
+    if (currTime_tm.tm_mon < 9)
+        timeStream << "0" << (currTime_tm.tm_mon + 1) << "-";
+    else
+        timeStream << (currTime_tm.tm_mon + 1) << "-";
+    
+    if (currTime_tm.tm_mday < 10)
+        timeStream << "0" << currTime_tm.tm_mday << " ";
+    else
+        timeStream << currTime_tm.tm_mday << " ";
+    
+    if (currTime_tm.tm_hour < 10)
+        timeStream << "0" << currTime_tm.tm_hour << ":";
+    else
+        timeStream << currTime_tm.tm_hour << ":";
+    
+    if (currTime_tm.tm_min < 10)
+        timeStream << "0" << currTime_tm.tm_min << ":";
+    else
+        timeStream << currTime_tm.tm_min << ":";
+    
+    if (currTime_tm.tm_sec < 10)
+        timeStream << "0" << currTime_tm.tm_sec;
+    else
+        timeStream << currTime_tm.tm_sec;
+    
+    try
+    {
+        if (!entryTitle.empty())
+        {
+            (*this)[entryTitle] = timeStream.str();
+            
+            std::cout << "Time stamp: " << timeStream.str() 
+                      << " successfully added to: "
+                      << getTitle() << "." << entryTitle;
+
+            return true;
+        }
+        else
+            return false;
+    }
+    
+    catch(...)
+    {
+        std::cout << "Error setting time stamp: " << timeStream.str()
+                  << " in Table: " << getTitle() << "." << entryTitle;
+        return false;
+    }
+
+        
+    
+    
+    
+    
+    
+    return true;
+}
+
+template<typename T1, typename T2, typename T3>
 ColumnEntry<T1,T2,T3>& TableEntry<T1,T2,T3>::operator[](const std::string& entryTitle)
 {
     
-    std::cout << "This is a call to the overloaded [] operator with string: " << entryTitle << std::endl;    
+    // std::cout << "This is a call to the overloaded [] operator with string: " << entryTitle << std::endl;    
     
     if (entryVec.size() > 0)
         for (auto &idx : entryVec)
@@ -86,11 +181,9 @@ template <typename T4, typename T5, typename T6>
 TableEntry<T4,T5,T6>& operator<< (TableEntry<T4,T5,T6>& table, 
                                   const std::string& entryTitle)
 {
-
     table.addEntry(entryTitle);
     return table;
 }
-
 
 template <typename charT, typename traits, typename T4, typename T5, typename T6>
 std::basic_istream<charT,traits>& operator>> 
@@ -101,6 +194,4 @@ std::basic_istream<charT,traits>& operator>>
         table.addEntry(tmpstr);
     return istr;
 }
-
-
 

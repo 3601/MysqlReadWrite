@@ -35,9 +35,9 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/configIO.o \
-	${OBJECTDIR}/main.o \
-	${OBJECTDIR}/mysqlRW.o
+	${OBJECTDIR}/configBase.o \
+	${OBJECTDIR}/configRW.o \
+	${OBJECTDIR}/main.o
 
 
 # C Compiler Flags
@@ -64,20 +64,20 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/mysqlreadwrite.exe: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/mysqlreadwrite ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/configIO.o: configIO.cpp 
+${OBJECTDIR}/configBase.o: configBase.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../../../../cygwin64/usr/include/mysql -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/configIO.o configIO.cpp
+	$(COMPILE.cc) -g -I../../../../../cygwin64/usr/include/mysql -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/configBase.o configBase.cpp
+
+${OBJECTDIR}/configRW.o: configRW.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I../../../../../cygwin64/usr/include/mysql -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/configRW.o configRW.cpp
 
 ${OBJECTDIR}/main.o: main.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I../../../../../cygwin64/usr/include/mysql -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
-
-${OBJECTDIR}/mysqlRW.o: mysqlRW.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -I../../../../../cygwin64/usr/include/mysql -std=c++14 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/mysqlRW.o mysqlRW.cpp
 
 # Subprojects
 .build-subprojects:

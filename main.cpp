@@ -8,56 +8,64 @@
 #include "mysqlRW.h"
 #include <iostream>
 #include <string>
-#include "tableEntry.h"
-#include "configIO.h"
-#include <boost/property_tree/ptree.hpp>
+//#include "tableEntry.h"
+//#include "configRW.h"
+//include <boost/property_tree/ptree.hpp>
 
 int main() 
 {
 
-    TableEntry<int,double,std::string> sqlTable("test");
-    sqlTable.addEntry("Henrik");
-    sqlTable["Tina"] = 2;
-    sqlTable["Henrik"] = "stringtest";
+    TableEntry<int,double,std::string> sqlTable("book");
     
-    sqlTable << "Rasmus" << "Mathias";
+    // sqlTable.addEntry("Henrik");
+    // sqlTable["Tina"] = 2;
+    // sqlTable["Henrik"] = "stringtest";
     
-    for (const auto &indx : sqlTable)
-        std::cout << indx.getTitle() << ":  " << indx.getValueStr() << "; ";
+    // sqlTable << "Rasmus" << "Mathias";
     
-    std::cout << std::endl;
+    // for (const auto &indx : sqlTable)
+    //    std::cout << indx.getTitle() << ":  " << indx.getValueStr() << "; ";
     
-    std::cout << "Call with new title: " << sqlTable["Thomas"].getTitle() << std::endl;
+    // std::cout << std::endl;
+    
+    // std::cout << "Call with new title: " << sqlTable["Thomas"].getTitle() << std::endl;
     
     // sqlTable.flush();
-    std::cout << "Values after flush: " << std::endl;
-    for (const auto &indx : sqlTable)
-        std::cout << indx.getTitle() << ": " << indx.getValueStr() << "; ";
+    // std::cout << "Values after flush: " << std::endl;
+    // for (const auto &indx : sqlTable)
+    //    std::cout << indx.getTitle() << ": " << indx.getValueStr() << "; ";
     
     std::cout << std::endl << "--- Load of config.json file ---" << std::endl;
     
-    ConfigIO cfgFile("C:/Users/Henrik/Programming/Cpp/mysqlReadWrite/mysqlReadWrite/config.json");
+    ConfigRW cfgFile("C:/Users/Henrik/Programming/Cpp/mysqlReadWrite/mysqlReadWrite/config.json");
+    
+    sqlTable.addTableConfig(cfgFile, "book");
 
-    std::istringstream dbConfig = cfgFile.getDbConfig();
-    
-    std::string host_name, user_name, db_name, password { };
-    
-    dbConfig >> host_name >> user_name >> db_name >> password;
-    
-    std::cout << "Mysql settings: " << host_name << ", " << user_name << ", "
-              << db_name << ", " << password << std::endl;
-    
-    std::istringstream tableconfig { };
-    
-    tableconfig = cfgFile.getTableConfig("sensor1_name");
-    
-    while (tableconfig >> sqlTable) {};
-    
-    std::cout << "Table contents after addition of entries from config file" << std::endl;
-    
     for (const auto &indx : sqlTable)
         std::cout << indx.getTitle() << ": " << indx.getValueStr() << std::endl;
     
+    std::cout << std::endl;
+    std::cout << std::endl << "--- Establish connection to the mySQL server ---" << std::endl;
+    
+    
+    
+    MysqlRW mysqlHandle(cfgFile);
+    // if (mysqlHandle.clearTable(sqlTable.getTitle()))
+    //    std::cout << "Table: " << sqlTable.getTitle() << " successfully cleared" << std::endl;
+    
+    mysqlHandle.clearTable("book");
+    
+    std::string title { };
+    for (int i = 10; i < 21; ++i)
+    {
+        title = "Title" + std::to_string(i);
+        sqlTable["Title"] = title;
+        sqlTable["Value"] = i;
+        sqlTable.addTimeStamp();
+        if (!mysqlHandle.uploadTableEntry(sqlTable, true))
+            break;      
+    }
+
     return 0;
 
 }

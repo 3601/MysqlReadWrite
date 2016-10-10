@@ -14,7 +14,8 @@ build/Debug/Cygwin-Windows/main.o: main.cpp mysqlRW.h \
  /cygdrive/c/cygwin64/usr/include/mysql/my_list.h \
  /cygdrive/c/cygwin64/usr/include/mysql/typelib.h \
  /cygdrive/c/cygwin64/usr/include/mysql/my_alloc.h tableEntry.h \
- columnEntry.h columnEntry.cpp tableEntry.cpp configIO.h
+ columnEntry.h columnEntry.cpp configRW.h configBase.h tableEntry.cpp \
+ mysqlRW.cpp
 
 mysqlRW.h:
 
@@ -54,6 +55,10 @@ columnEntry.h:
 
 columnEntry.cpp:
 
+configRW.h:
+
+configBase.h:
+
 tableEntry.cpp:
 
-configIO.h:
+mysqlRW.cpp:
